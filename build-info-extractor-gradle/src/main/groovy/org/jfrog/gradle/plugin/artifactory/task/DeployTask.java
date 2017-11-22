@@ -76,12 +76,12 @@ public class DeployTask extends DefaultTask {
                 accRoot, getProject().getRootProject());
 
         Set<GradleDeployDetails> allDeployDetails = Sets.newTreeSet();
-        List<BuildInfoBaseTask> orderedTasks = findBuildInfoBaseTasks(getProject().getGradle().getTaskGraph());
-        for (BuildInfoBaseTask bit : orderedTasks) {
-            log.debug("Uploading task '{}'", bit.getPath());
-            if (bit.getDidWork()) {
+        List<ArtifactoryTask> orderedTasks = findArtifactoryPublishTasks(getProject().getGradle().getTaskGraph());
+        for (ArtifactoryTask artifactoryTask : orderedTasks) {
+            log.debug("Uploading task '{}'", artifactoryTask.getPath());
+            if (artifactoryTask.getDidWork()) {
                 ArtifactoryClientConfiguration.PublisherHandler publisher =
-                        ArtifactoryPluginUtil.getPublisherHandler(bit.getProject());
+                        ArtifactoryPluginUtil.getPublisherHandler(artifactoryTask.getProject());
 
                 if (publisher != null && publisher.getContextUrl() != null) {
                     Map<String, String> moduleProps = new HashMap<String, String>(propsRoot);
@@ -97,7 +97,7 @@ public class DeployTask extends DefaultTask {
                         password = "";
                     }
 
-                    bit.collectDescriptorsAndArtifactsForUpload();
+                    artifactoryTask.collectDescriptorsAndArtifactsForUpload();
                     if (publisher.isPublishArtifacts()) {
                         ArtifactoryBuildInfoClient client = null;
                         try {
@@ -111,14 +111,14 @@ public class DeployTask extends DefaultTask {
                             configureProxy(accRoot, client);
                             configConnectionTimeout(accRoot, client);
                             configRetriesParams(accRoot, client);
-                            deployArtifacts(bit.deployDetails, client, patterns);
+                            deployArtifacts(artifactoryTask.deployDetails, client, patterns);
                         } finally {
                             if (client != null) {
                                 client.close();
                             }
                         }
                     }
-                    allDeployDetails.addAll(bit.deployDetails);
+                    allDeployDetails.addAll(artifactoryTask.deployDetails);
                 }
             } else {
                 log.debug("task '{}' did no work", bit.getPath());
@@ -264,14 +264,13 @@ public class DeployTask extends DefaultTask {
         }
     }
 
-    private List<BuildInfoBaseTask> findBuildInfoBaseTasks(TaskExecutionGraph graph) {
-        List<BuildInfoBaseTask> tasks = new ArrayList<BuildInfoBaseTask>();
+    private List<ArtifactoryTask> findArtifactoryPublishTasks(TaskExecutionGraph graph) {
+        List<ArtifactoryTask> tasks = new ArrayList<ArtifactoryTask>();
         for (Task task : graph.getAllTasks()) {
-            if (task instanceof BuildInfoBaseTask) {
-                tasks.add(((BuildInfoBaseTask) task));
+            if (task instanceof ArtifactoryTask) {
+                tasks.add(((ArtifactoryTask)task));
             }
         }
         return tasks;
     }
-
 }

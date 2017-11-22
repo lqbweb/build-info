@@ -45,11 +45,12 @@ public class GradleArtifactoryClientConfigUpdater {
 
     /**
      * Returns a configuration handler object out of a Gradle project. This method will aggregate the properties in our
-     * defined hierarchy.<br/> <ol><li>First search for the property as a system property, if found return it.</li>
-     * <li>Second search for the property in the Gradle {@link org.gradle.StartParameter#getProjectProperties} container
-     * and if found there, then return it.</li> <li>Third search for the property in {@link
-     * org.gradle.api.Project#property(String)}</li> <li>if not found, search upwards in the project hierarchy until
-     * reach the root project.</li> <li> if not found at all in this hierarchy return null</li></ol>
+     * defined hierarchy. First search for the property as a system property, if found return it.
+     * Second search for the property in the Gradle {@link org.gradle.StartParameter#getProjectProperties} container
+     * and if found there, then return it. Third search for the property in {@link
+     * org.gradle.api.Project#property(String)}
+     * if not found, search upwards in the project hierarchy until
+     * reach the root project. if not found at all in this hierarchy return null
      *
      * @param project the gradle project with properties for build info client configuration (Usually in start parameter
      *                from CI Server)
@@ -90,6 +91,8 @@ public class GradleArtifactoryClientConfigUpdater {
         if (StringUtils.isBlank(buildName)) {
             buildName = project.getRootProject().getName();
             config.info.setBuildName(buildName);
+        }
+        if (StringUtils.isBlank(config.publisher.getMatrixParam(BuildInfoFields.BUILD_NAME))) {
             config.publisher.addMatrixParam(BuildInfoFields.BUILD_NAME, buildName);
         }
 
@@ -98,19 +101,26 @@ public class GradleArtifactoryClientConfigUpdater {
         if (StringUtils.isBlank(buildNumber)) {
             buildNumber = new Date().getTime() + "";
             config.info.setBuildNumber(buildNumber);
+        }
+        if (StringUtils.isBlank(config.publisher.getMatrixParam(BuildInfoFields.BUILD_NUMBER))) {
             config.publisher.addMatrixParam(BuildInfoFields.BUILD_NUMBER, buildNumber);
         }
 
         // Build start (was set by the plugin - no need to make up a fallback val)
-        String buildStartedIso = config.info.getBuildStarted();
-        if (StringUtils.isBlank(buildStartedIso)) {
+        String buildTimestamp = config.info.getBuildTimestamp();
+        if (StringUtils.isBlank(buildTimestamp)) {
+            String buildStartedIso = config.info.getBuildStarted();
             Date buildStartDate;
             try {
                 buildStartDate = new SimpleDateFormat(Build.STARTED_FORMAT).parse(buildStartedIso);
             } catch (ParseException e) {
                 throw new RuntimeException("Build start date format error: " + buildStartedIso, e);
             }
-            config.publisher.addMatrixParam(BuildInfoFields.BUILD_TIMESTAMP, String.valueOf(buildStartDate.getTime()));
+            buildTimestamp = String.valueOf(buildStartDate.getTime());
+            config.info.setBuildTimestamp(buildTimestamp);
+        }
+        if (StringUtils.isBlank(config.publisher.getMatrixParam(BuildInfoFields.BUILD_TIMESTAMP))) {
+            config.publisher.addMatrixParam(BuildInfoFields.BUILD_TIMESTAMP, buildTimestamp);
         }
 
         // Build agent

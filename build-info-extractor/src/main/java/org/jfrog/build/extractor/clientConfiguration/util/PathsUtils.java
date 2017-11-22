@@ -19,13 +19,11 @@ public class PathsUtils {
         String target = destString;
         Matcher matcher = regexPattern.matcher(sourceString.replace("\\", "/"));
         if (matcher.find()) {
-            int groupCount = matcher.groupCount();
-            for (int i = 1; i <= groupCount; i++) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
                 String currentGroup = matcher.group(i);
                 if (currentGroup == null) {
                     continue;
                 }
-                currentGroup.replace("\\", "/");
                 target = target.replace("{" + i + "}", currentGroup);
             }
         }
@@ -99,7 +97,7 @@ public class PathsUtils {
                 // Escape special regexp-characters
                 case '[': case ']': case '$': case '^':
                 case '.': case '{': case '}': case '|':
-                case '\\':
+                case '\\': case '+':
                     sb.append("\\");
                     sb.append(c);
                     break;
@@ -120,8 +118,6 @@ public class PathsUtils {
      * @param targetPath the path which the file name will be taken targetDir/targetPath/targetFileName
      * @param srcPath    the path which the file name will be replace srcDir/srcPath/srcFileName
      * @return map with the new targetPath and srcPath as values.
-     * @pre targetPath and srcPath are not empty.
-     * @pre targetPath Contains "/"
      */
     public static Map<String, String> replaceFilesName(String targetPath, String srcPath) {
         String targetDirPath = StringUtils.substringBeforeLast(targetPath, "/");
