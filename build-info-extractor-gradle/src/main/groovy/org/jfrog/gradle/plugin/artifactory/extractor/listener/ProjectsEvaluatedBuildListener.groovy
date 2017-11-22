@@ -59,6 +59,7 @@ public class ProjectsEvaluatedBuildListener extends BuildAdapter implements Proj
     }
 
     private void evaluate(BuildInfoBaseTask bit) {
+        log.debug("evaluating buildBaseTask {}", bit)
         ArtifactoryClientConfiguration configuration = null;
         ArtifactoryPluginConvention convention =
                 ArtifactoryPluginUtil.getArtifactoryConvention(bit.project)

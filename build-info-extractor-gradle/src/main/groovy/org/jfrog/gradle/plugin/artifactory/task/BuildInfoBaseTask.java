@@ -95,6 +95,7 @@ public abstract class BuildInfoBaseTask extends DefaultTask {
             log.debug("artifactoryPublish task '{}' skipped for project '{}'.",
                     this.getPath(), project.getName());
         } else {
+            log.debug("adding artifactory specs for task {}", this.getPath());
             ArtifactoryPluginConvention convention = ArtifactoryPluginUtil.getPublisherConvention(project);
             if (convention != null) {
                 ArtifactoryClientConfiguration acc = convention.getClientConfig();

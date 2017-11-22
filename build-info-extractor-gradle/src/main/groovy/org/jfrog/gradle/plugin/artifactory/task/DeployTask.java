@@ -78,6 +78,7 @@ public class DeployTask extends DefaultTask {
         Set<GradleDeployDetails> allDeployDetails = Sets.newTreeSet();
         List<BuildInfoBaseTask> orderedTasks = findBuildInfoBaseTasks(getProject().getGradle().getTaskGraph());
         for (BuildInfoBaseTask bit : orderedTasks) {
+            log.debug("Uploading task '{}'", bit.getPath());
             if (bit.getDidWork()) {
                 ArtifactoryClientConfiguration.PublisherHandler publisher =
                         ArtifactoryPluginUtil.getPublisherHandler(bit.getProject());
@@ -119,6 +120,8 @@ public class DeployTask extends DefaultTask {
                     }
                     allDeployDetails.addAll(bit.deployDetails);
                 }
+            } else {
+                log.debug("task '{}' did no work", bit.getPath());
             }
         }
 
